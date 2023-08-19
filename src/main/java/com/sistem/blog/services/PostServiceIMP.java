@@ -4,7 +4,9 @@ import com.sistem.blog.DTO.ListPostDTO;
 import com.sistem.blog.DTO.PostDTO;
 import com.sistem.blog.exceptions.ResourceAlreadyExistsException;
 import com.sistem.blog.exceptions.ResourceNotFoundException;
+import com.sistem.blog.model.Comment;
 import com.sistem.blog.model.Post;
+import com.sistem.blog.repository.CommentRepository;
 import com.sistem.blog.repository.PostRespository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -18,7 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +33,8 @@ public class PostServiceIMP implements PostService{
 
     @Autowired
     private PostRespository PostEM;
+    @Autowired
+    private CommentRepository CommentEm;
     @Override
     public PostDTO createPost(PostDTO postReq) {
         //convert DTO to Entity
@@ -64,22 +70,18 @@ public class PostServiceIMP implements PostService{
 
     @Override
     public PostDTO getPostById(long id) {
-        try{
-            Post post= PostEM.getReferenceById(id);
-            return convertPostToDto(post);
-        }catch (EntityNotFoundException e) {
-            throw new ResourceNotFoundException("Post", "id", id);
-        }
+        Post post = PostEM.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+        Set<Comment> comments = CommentEm.findByPostId(id);
+        PostDTO newPost=convertPostToDto(post);
+        newPost.setListOfComment(comments);
+        return newPost;
     }
 
     @Override
     public PostDTO updatePost(PostDTO reqPost, Long id) {
-        Post post;
-        try{
-            post= PostEM.getReferenceById(id);
-        }catch (EntityNotFoundException  e) {
-            throw new ResourceNotFoundException("Post", "id", id);
-        }
+        Post post = PostEM.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         post.setTitle(reqPost.getTitle());
         post.setContent(reqPost.getContent());
         post.setDescription(reqPost.getDescription());
@@ -103,19 +105,28 @@ public class PostServiceIMP implements PostService{
     }
 
     private PostDTO convertPostToDto (Post post){
+        PostDTO postDTO = modelMapper.map(post, PostDTO.class);
+        Set<Comment> comments = CommentEm.findByPostId(post.getId());
+        postDTO.setListOfComment(new HashSet<>(comments));
+        return postDTO;
+        /*
         PostDTO DTOpost= new PostDTO();
         DTOpost.setTitle(post.getTitle());
         DTOpost.setId(post.getId());
         DTOpost.setDescription(post.getDescription());
         DTOpost.setContent(post.getContent());
         return DTOpost;
+         */
     }
     private Post convertDtoToPost (PostDTO postDTO){
+        return modelMapper.map(postDTO, Post.class);
+        /*
         Post post= new Post();
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setDescription(postDTO.getDescription());
         return post;
+        */
     }
 
 }

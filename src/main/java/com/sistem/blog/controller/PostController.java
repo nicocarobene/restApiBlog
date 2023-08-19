@@ -2,17 +2,13 @@ package com.sistem.blog.controller;
 
 import com.sistem.blog.DTO.ListPostDTO;
 import com.sistem.blog.DTO.PostDTO;
-import com.sistem.blog.exceptions.ResourceNotFoundException;
-import com.sistem.blog.services.PostService;
 import com.sistem.blog.services.PostServiceIMP;
 import com.sistem.blog.utils.AppCONSTANTS;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/post")
@@ -37,13 +33,13 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postReq){
+    public ResponseEntity<PostDTO> createPost(@Valid @RequestBody PostDTO postReq){
         PostDTO newPost= postService.createPost(postReq);
         return ResponseEntity.status(HttpStatus.CREATED).body(newPost);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> updatePost(@PathVariable Long id, @RequestBody PostDTO postReq){
+    public ResponseEntity<PostDTO> updatePost(@PathVariable Long id, @Valid @RequestBody PostDTO postReq){
         PostDTO post = postService.updatePost(postReq, id);
         return ResponseEntity.ok(post);
     }

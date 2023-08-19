@@ -2,6 +2,7 @@ package com.sistem.blog.controller;
 
 import com.sistem.blog.DTO.CommentDTO;
 import com.sistem.blog.services.CommentServiceIMP;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,8 @@ public class CommentController {
     }
     @GetMapping("/post/{idPost}/{id}")
     public ResponseEntity<CommentDTO> getCommentById(
-            @PathVariable(value = "id") long comment_id,
-            @PathVariable(value = "idPost") long post_id
+            @PathVariable(value = "id") Long comment_id,
+            @PathVariable(value = "idPost") Long post_id
             ){
         CommentDTO comment= commentService.getCommentById(comment_id,post_id);
         return ResponseEntity.status(HttpStatus.FOUND).body(comment);
@@ -31,19 +32,19 @@ public class CommentController {
 
     @PutMapping("/post/{idPost}/{id}")
     public ResponseEntity<CommentDTO> updateComment(
-            @PathVariable(value = "id") long comment_id,
-            @PathVariable(value = "idPost") long post_id,
-            @RequestBody CommentDTO newComment
+            @PathVariable(value = "id") Long comment_id,
+            @PathVariable(value = "idPost") Long post_id,
+            @Valid @RequestBody CommentDTO newComment
     ){
         CommentDTO comment= commentService.updateComment(comment_id,post_id,newComment);
         return ResponseEntity.ok(comment);
     }
     @PostMapping("/{id}")
     public ResponseEntity<CommentDTO> createComment(
-            @PathVariable(value = "id") long id,
-            @RequestBody CommentDTO comentReq
+            @PathVariable(value = "id") Long id,
+            @Valid @RequestBody CommentDTO commentReq
     ){
-        CommentDTO newComment= commentService.createComment(id, comentReq);
+        CommentDTO newComment= commentService.createComment(id, commentReq);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(newComment);
@@ -51,8 +52,8 @@ public class CommentController {
 
     @DeleteMapping("/post/{idPost}/{id}")
     public ResponseEntity<String> deleteComment(
-            @PathVariable(value = "id") long comment_id,
-            @PathVariable(value = "idPost") long post_id
+            @PathVariable(value = "id") Long comment_id,
+            @PathVariable(value = "idPost") Long post_id
     ){
         commentService.deleteComment(comment_id, post_id);
         return ResponseEntity.ok("Comment with ID " + comment_id + " has been deleted.");
