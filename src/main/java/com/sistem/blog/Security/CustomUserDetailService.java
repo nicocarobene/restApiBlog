@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 @Service
 public class CustomUserDetailService implements UserDetailsService {
@@ -24,11 +23,7 @@ public class CustomUserDetailService implements UserDetailsService {
         System.out.println("holaa estamos en detailuser");
         com.sistem.blog.model.User user= userEm.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found with username or email"));
-        if(!Objects.isNull(user)){
-            return new User(user.getEmail(),user.getPassword(),mapperRoles(user.getRol()));
-        }else {
-            throw new UsernameNotFoundException("User not found");
-        }
+        return new User(user.getEmail(),user.getPassword(),mapperRoles(user.getRol()));
     }
     private Collection<? extends GrantedAuthority> mapperRoles(Set<Rol> rolSet){
         return rolSet.stream().map(rol-> new SimpleGrantedAuthority(rol.getName())).toList();

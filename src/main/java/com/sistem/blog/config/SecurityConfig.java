@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,6 +35,14 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailService userDetailService;
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 
     @Bean
     public AuthenticationProvider authenticationProvider(){
@@ -44,46 +53,28 @@ public class SecurityConfig {
     }
 
 
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    @Bean
-    public SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authz -> {
-                    authz
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE,"/h2-console/**")).permitAll();
-                })
-                .csrf(csrf-> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")))
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
-        return http.build();
-    }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> {
                     authz
+                            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH, "/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/h2-console/**")).permitAll()
                             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/**")).permitAll()
                             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/**")).authenticated()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/**")).hasRole("ADMIN");
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/**")).hasRole("ADMIN")
+                            .anyRequest().authenticated();
                 })
-                //.httpBasic(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())
+                .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")))
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         return http.build();
     }
-
 
 
 
@@ -125,6 +116,35 @@ public class SecurityConfig {
                 .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(userDetails, admin);
+    }
+    @Bean
+    public SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authz -> {
+                    authz
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH,"/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT,"/h2-console/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE,"/h2-console/**")).permitAll();
+                })
+                .csrf(csrf-> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")))
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+        return http.build();
+    }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authz -> {
+                    authz
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/**")).permitAll()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/**")).authenticated()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/**")).hasRole("ADMIN");
+                })
+                //.httpBasic(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+        return http.build();
     }
     */
 
