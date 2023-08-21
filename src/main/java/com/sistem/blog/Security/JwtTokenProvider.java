@@ -36,16 +36,20 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJwt(token).getBody();
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJwt(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
-        } catch (SignatureException e) {
-            throw new BlogAppException(HttpStatus.BAD_REQUEST, "Sing is not valid");
         } catch (MalformedJwtException ex) {
             throw new BlogAppException(HttpStatus.BAD_REQUEST, "token is not valid");
         } catch (ExpiredJwtException e) {

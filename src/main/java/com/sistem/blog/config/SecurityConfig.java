@@ -40,8 +40,10 @@ public class SecurityConfig {
                             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/**")).permitAll()
                             .requestMatchers(AntPathRequestMatcher.antMatcher( "/h2-console/**")).permitAll()
                             .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/**")).authenticated()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/**")).hasRole("ADMIN")
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/comment/**")).authenticated()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/comment/**")).hasRole("ADMIN")
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/post/**")).authenticated()
+                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/post/**")).hasRole("ADMIN")
                             .anyRequest().authenticated();
                 })
                 //.httpBasic(Customizer.withDefaults())
@@ -63,25 +65,6 @@ public class SecurityConfig {
 
 
     /*
-        @Bean
-    public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider= new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
-        System.out.println(auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder()));
-    }
-
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails userDetails = User
@@ -98,35 +81,6 @@ public class SecurityConfig {
                 .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(userDetails, admin);
-    }
-    @Bean
-    public SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authz -> {
-                    authz
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT,"/h2-console/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE,"/h2-console/**")).permitAll();
-                })
-                .csrf(csrf-> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")))
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
-        return http.build();
-    }
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authz -> {
-                    authz
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/**")).permitAll()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/**")).authenticated()
-                            .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/**")).hasRole("ADMIN");
-                })
-                //.httpBasic(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
-        return http.build();
     }
     */
 
